@@ -1,6 +1,7 @@
 package com.example.catalog;
 
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ public class CatalogController {
         return "Hello from catalog service";
     }
 
+    @HystrixCommand(fallbackMethod = "fallback")
     @GetMapping("/catalog/{id}")
     public Catalog getCatalog(@PathVariable int id) {
         Catalog catalog = new Catalog();
@@ -31,6 +33,12 @@ public class CatalogController {
                                              List.class);
         catalog.setProducts(products);
 
+        return catalog;
+    }
+
+    public Catalog fallback(int catalogId, Throwable hystrixCommand) {
+        Catalog catalog = new Catalog();
+        catalog.setId(catalogId);
         return catalog;
     }
 }
